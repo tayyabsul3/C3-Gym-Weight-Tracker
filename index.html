@@ -215,9 +215,18 @@ header .sub{font-size:11px;color:var(--text2);margin-top:2px;font-family:var(--f
   border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;outline:none;min-height:48px;
   font-family:var(--font-body);
 }
+.progress-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:420px){.progress-stats{grid-template-columns:repeat(2,1fr)}}
+.pstat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;text-align:center}
+.pstat-l{display:block;font-size:10px;color:var(--text2);font-family:var(--font-mono);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:2px}
+.pstat-v{display:block;font-size:16px;font-weight:800;font-family:var(--font-head);color:var(--text)}
 .chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px}
 .chart-wrap canvas{width:100%;height:auto;display:block}
 .chart-empty{text-align:center;padding:48px 20px;color:var(--text2);font-size:14px}
+.prog-table{margin-top:6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px;max-height:240px;overflow-y:auto}
+.prog-table table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--font-mono)}
+.prog-table th{text-align:left;padding:4px 6px;color:var(--text2);font-size:10px;letter-spacing:0.05em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.prog-table td{padding:4px 6px;border-bottom:1px solid var(--border);color:var(--text)}
 /* Settings */
 .setting-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:12px}
 .setting-card h3{font-family:var(--font-head);font-size:15px;font-weight:700;margin-bottom:10px}
@@ -298,7 +307,7 @@ const WORKOUT = [
     {name:"Dumbbell Lateral Raise",reps:"4x15",alt:"Cable Lateral Raise"},
     {name:"Triceps Pushdown",reps:"4x12",alt:"Overhead DB Extension"},
     {name:"Bench Dips",reps:"3 sets to failure",alt:"Assisted Dip Machine",bodyweight:true},
-    {name:"Dead Hang",reps:"3x30 sec",alt:"",bodyweight:true}
+    {name:"Dead Hang",reps:"3x30 sec",alt:"",type:"timed"}
   ]},
   {day:"DAY 2 - PULL",feel:"Squeeze in lats, burn in biceps",exercises:[
     {name:"Lat Pulldown",reps:"4x10",alt:"Band-Assisted Pull-Up"},
@@ -308,17 +317,17 @@ const WORKOUT = [
     {name:"Hammer Curl",reps:"3x12",alt:"Cable Rope Curl"},
     {name:"Shrugs",reps:"4x15",alt:""},
     {name:"Face Pulls",reps:"3x15",alt:""},
-    {name:"Plank",reps:"3x30 sec",alt:"",bodyweight:true}
+    {name:"Plank",reps:"3x30 sec",alt:"",type:"timed"}
   ]},
   {day:"DAY 3 - CORE + CARDIO",feel:"Sweat, abs on fire, lungs working hard",exercises:[
     {name:"Hanging Leg Raise",reps:"4x15",alt:"Lying Leg Raise"},
     {name:"Weighted Decline Sit-Ups",reps:"4x12",alt:"Crunch Machine"},
     {name:"Cable Woodchoppers",reps:"3x12",alt:"Russian Twist"},
-    {name:"Mountain Climbers",reps:"3x30 sec",alt:"",bodyweight:true},
+    {name:"Mountain Climbers",reps:"3x30 sec",alt:"",type:"timed"},
     {name:"Bicycle Crunches",reps:"3x20",alt:"",bodyweight:true},
-    {name:"High Knees",reps:"3x30 sec",alt:"",bodyweight:true},
-    {name:"Plank with Shoulder Tap",reps:"3x30 sec",alt:"",bodyweight:true},
-    {name:"Treadmill or Skipping",reps:"15 min high pace",alt:"",bodyweight:true}
+    {name:"High Knees",reps:"3x30 sec",alt:"",type:"timed"},
+    {name:"Plank with Shoulder Tap",reps:"3x30 sec",alt:"",type:"timed"},
+    {name:"Treadmill or Skipping",reps:"15 min high pace",alt:"",type:"timed"}
   ]},
   {day:"DAY 4 - PUSH 2",feel:"Burn in side delts and triceps",exercises:[
     {name:"Standing Overhead Barbell Press",reps:"4x8",alt:"Machine Shoulder Press"},
@@ -353,6 +362,7 @@ const WORKOUT = [
 ];
 
 const STORAGE_KEY = 'liftlog_data';
+const typeCycle={weighted:'bodyweight',bodyweight:'timed',timed:'weighted'};
 let state = loadState();
 
 function defaultState(){
@@ -360,7 +370,7 @@ function defaultState(){
     selectedDay:0, weightLogs:{}, videoLinks:{}, deletedExercises:{}, customExercises:{},
     attendance:{}, profile:{name:"Trainee",goal:"Build muscle, get stronger"},
     calendarYear:0, calendarMonth:-1, currentPage:"workout",
-    deletedDays:[], customDays:[], showOnboard:true
+    deletedDays:[], customDays:[], showOnboard:true, exerciseTypes:{}
   };
 }
 
@@ -378,7 +388,7 @@ function loadState(){
           calendarYear:p.calendarYear??0, calendarMonth:p.calendarMonth??-1,
           currentPage:p.currentPage??"workout",
           deletedDays:p.deletedDays??[], customDays:p.customDays??[],
-          showOnboard:p.showOnboard??true, _chartMode:p._chartMode
+          showOnboard:p.showOnboard??true, _chartMode:p._chartMode, exerciseTypes:p.exerciseTypes??{}
         };
       }
     }
@@ -565,41 +575,64 @@ function renderWorkout(){
   const exercises=getExercisesForDay(sel);
   const cw=getWeekId();
 
+  function getExerciseType(e){
+    const o=state.exerciseTypes?.[e._key];
+    if(o)return o;
+    if(e.type)return e.type;
+    if(e.bodyweight)return 'bodyweight';
+    return 'weighted';
+  }
+  const typeLabels={weighted:'W',bodyweight:'BW',timed:'⏱'};
+  const typeNames={weighted:'Weighted',bodyweight:'Bodyweight',timed:'Timed'};
+
   exercises.forEach(ex=>{
     const logs=getWeightLogs(ex._key);
     const cur=logs.find(l=>l.week===cw);
+    const etype=getExerciseType(ex);
+    const bw=etype==='bodyweight';
+    const timed=etype==='timed';
     const w=cur?(cur.weight??''):'';
     const r=cur?(cur.reps??''):'';
-    const bw=ex.bodyweight===true;
+    const tm=cur?(cur.time??''):'';
     const cCls=ex._isBuiltIn?'':' c-exercise';
 
     html+='<div class="exercise-card'+cCls+'" data-key="'+ex._key+'">';
-    const prevLog=[...logs].sort((a,b)=>b.week.localeCompare(a.week)).find(l=>l.weight||l.reps);
+    const prevLog=[...logs].sort((a,b)=>b.week.localeCompare(a.week)).find(l=>l.weight||l.reps||l.time);
     let lastStr='';
     if(prevLog){
-      if(prevLog.weight&&!bw)lastStr+=fmtW(prevLog.weight)+'kg';
+      if(prevLog.weight&&!bw&&!timed)lastStr+=fmtW(prevLog.weight)+'kg';
+      if(timed&&prevLog.time)lastStr+=prevLog.time+'s';
       if(prevLog.reps)lastStr+=(lastStr?' ×':'')+prevLog.reps;
       if(lastStr)lastStr=' <span style="color:var(--text2);font-weight:400">· Last:</span> <span style="color:var(--success)">'+lastStr+'</span>';
-      if(prevLog.weight&&prevLog.reps&&!bw){
+      if(prevLog.weight&&prevLog.reps&&!bw&&!timed){
         const vol=parseFloat(prevLog.weight)*parseInt(prevLog.reps);
         if(!isNaN(vol))lastStr+=' <span style="color:var(--text2);font-weight:400">· Vol:</span> <span style="color:var(--primary)">'+vol+'</span>';
       }
     }
-    const hintReps=prevLog&&prevLog.reps?'Last: '+prevLog.reps:(bw?'reps/time':'reps');
-    html+='<div class="card-header"><div class="ex-info"><div class="exercise-name">'+esc(ex.name)+'</div><div class="exercise-meta">'+esc(ex.reps)+lastStr+(ex.alt?' <span class="alt">Alt: '+esc(ex.alt)+'</span>':'')+'</div></div>';
+    const hintReps=prevLog&&prevLog.reps?'Last: '+prevLog.reps:(timed?'sets':(bw?'reps':'reps'));
+    const hintTime=prevLog&&prevLog.time?'Last: '+prevLog.time+'s':'sec';
+    html+='<div class="card-header"><div class="ex-info"><div class="exercise-name">'+esc(ex.name)+' <span class="type-chip" data-action="cycle-type" data-key="'+ex._key+'" style="font-size:10px;font-weight:600;color:var(--primary);cursor:pointer;font-family:var(--font-mono);letter-spacing:0.05em;background:var(--surface2);padding:1px 6px;border-radius:var(--radius-full);vertical-align:middle">'+typeLabels[etype]+'</span></div><div class="exercise-meta">'+esc(ex.reps)+lastStr+(ex.alt?' <span class="alt">Alt: '+esc(ex.alt)+'</span>':'')+'</div></div>';
     html+='<button class="delete-btn" data-action="del" data-key="'+ex._key+'">×</button></div>';
     html+='<div class="input-row">';
-    if(!bw)html+='<div class="input-group"><label>Wt</label><input type="number" step="0.5" min="0" placeholder="kg" value="'+w+'" inputmode="decimal" data-field="weight"></div>';
-    html+='<div class="input-group"><label>Reps</label><input type="text" inputmode="numeric" placeholder="'+hintReps+'" value="'+r+'" data-field="reps"></div>';
+    if(timed){
+      html+='<div class="input-group"><label>Time</label><input type="number" step="1" min="0" placeholder="'+hintTime+'" value="'+tm+'" inputmode="numeric" data-field="time"></div>';
+      html+='<div class="input-group"><label>Sets</label><input type="text" inputmode="numeric" placeholder="'+hintReps+'" value="'+r+'" data-field="reps"></div>';
+    }else if(!bw){
+      html+='<div class="input-group"><label>Wt</label><input type="number" step="0.5" min="0" placeholder="kg" value="'+w+'" inputmode="decimal" data-field="weight"></div>';
+      html+='<div class="input-group"><label>Reps</label><input type="text" inputmode="numeric" placeholder="'+hintReps+'" value="'+r+'" data-field="reps"></div>';
+    }else{
+      html+='<div class="input-group"><label>Reps</label><input type="text" inputmode="numeric" placeholder="'+hintReps+'" value="'+r+'" data-field="reps"></div>';
+    }
     html+='<button class="btn btn-primary" data-action="log" data-key="'+ex._key+'">'+(cur?'Update':'Log')+'</button>';
     html+='</div>';
 
     html+='<div class="history">';
     [...logs].sort((a,b)=>b.week.localeCompare(a.week)).forEach(l=>{
       let t=fmtWeek(l.week);
-      if(l.weight&&!bw)t+=' <span class="val">'+fmtW(l.weight)+'kg</span>';
+      if(l.weight&&!bw&&!timed)t+=' <span class="val">'+fmtW(l.weight)+'kg</span>';
+      if(timed&&l.time)t+=' <span class="val">'+l.time+'s</span>';
       if(l.reps)t+=' <span class="val">×'+l.reps+'</span>';
-      if(l.weight&&l.reps&&!bw){
+      if(l.weight&&l.reps&&!bw&&!timed){
         const vol=parseFloat(l.weight)*parseInt(l.reps);
         if(!isNaN(vol))t+=' <span class="vol">⤴'+vol+'</span>';
       }
@@ -639,7 +672,7 @@ function showAddForm(el,di){
     <div class="af-row"><label class="d">Exercise Name</label><input type="text" id="af_name" placeholder="e.g. Dumbbell Curl"></div>
     <div class="af-row"><label class="d">Sets × Reps</label><input type="text" id="af_reps" placeholder="e.g. 4x10"></div>
     <div class="af-row"><label class="d">Alternative</label><input type="text" id="af_alt" placeholder="e.g. Barbell Curl"></div>
-    <div class="af-row"><label class="af-check"><input type="checkbox" id="af_bw"> Bodyweight (no weight)</label></div>
+    <div class="af-row"><label class="d">Type</label><select id="af_type" style="width:100%;padding:9px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;outline:none;font-family:var(--font-body)"><option value="weighted">Weighted</option><option value="bodyweight">Bodyweight</option><option value="timed">Timed</option></select></div>
     <div class="af-actions"><button class="btn btn-primary" id="af_add">Add</button><button class="btn btn-outline" id="af_cancel">Cancel</button></div>
   `;
   addBtn.parentNode.insertBefore(form,addBtn.nextSibling);
@@ -649,8 +682,12 @@ function showAddForm(el,di){
     const n=document.getElementById('af_name').value.trim();if(!n){showToast('❌ Name is required');return}
     const r=document.getElementById('af_reps').value.trim()||'3x10';
     const a=document.getElementById('af_alt').value.trim();
-    const bw=document.getElementById('af_bw').checked;
-    const c=state.customExercises[di]||[];c.push({name:n,reps:r,alt:a,bodyweight:bw});
+    const tp=document.getElementById('af_type').value;
+    const c=state.customExercises[di]||[];
+    const obj={name:n,reps:r,alt:a};
+    if(tp==='bodyweight')obj.bodyweight=true;
+    else if(tp==='timed')obj.type='timed';
+    c.push(obj);
     state.customExercises[di]=c;saveState();render();
     showToast('✅ Added "'+n+'"');
   };
@@ -755,6 +792,11 @@ function renderProgress(){
   const selEx=state._progressKey||allEx[0]._key;
   if(!allEx.find(e=>e._key===selEx)){state._progressKey=allEx[0]._key;saveState()}
 
+  // Determine exercise type
+  const exDef=allEx.find(e=>e._key===selEx);
+  const exOverride=state.exerciseTypes?.[selEx];
+  const exType=exOverride||(exDef?.type)||(exDef?.bodyweight?'bodyweight':'weighted');
+
   let html='<div class="page active"><div class="page-title">📈 Progress</div>';
   html+='<div class="progress-sel"><select id="progSelect">';
   allEx.forEach(e=>{html+='<option value="'+e._key+'"'+(e._key===selEx?' selected':'')+'>'+esc(e.name)+' ('+esc(e.dayName.replace('DAY','').trim())+')</option>'});
@@ -762,11 +804,18 @@ function renderProgress(){
 
   const logs=getWeightLogs(selEx);
   const sorted=[...logs].sort((a,b)=>a.week.localeCompare(b.week));
-  const hasV=sorted.some(l=>l.weight&&l.reps);
-  const chartMode=state._chartMode||(hasV?'volume':'weight');
+
+  // Build chart mode options based on type
+  const hasW=sorted.some(l=>l.weight);
+  const hasT=sorted.some(l=>l.time);
+  const modes=[];
+  if(exType==='weighted'&&hasW)modes.push({v:'weight',l:'Weight (kg)'});
+  modes.push({v:'reps',l:'Reps'});
+  if(exType==='weighted'&&hasW)modes.push({v:'volume',l:'Volume'});
+  if(exType==='timed'&&hasT)modes.push({v:'time',l:'Duration (s)'});
+
+  const chartMode=state._chartMode||modes[0]?.v||'reps';
   html+='<div class="progress-sel"><select id="chartMode">';
-  const modes=[{v:'weight',l:'Weight'},{v:'reps',l:'Reps'}];
-  if(hasV)modes.push({v:'volume',l:'Volume'});
   modes.forEach(m=>{html+='<option value="'+m.v+'"'+(chartMode===m.v?' selected':'')+'>'+m.l+'</option>'});
   html+='</select></div>';
 
@@ -774,45 +823,68 @@ function renderProgress(){
     html+='<div class="chart-empty">Log at least 2 weeks of data to see progress.</div></div>';
     el.innerHTML=html;
   }else{
-    let field=chartMode;
-    if(field==='volume')field='weight';
+    // Filter and map values
     const filt=sorted.filter(l=>{
-      if(chartMode==='volume'){
-        if(!l.weight||!l.reps)return false;
-        const v=parseFloat(l.weight)*parseInt(l.reps);
-        return !isNaN(v)&&v>0;
-      }
-      const v=field==='weight'?l.weight:parseInt(l.reps);
-      return v&&!isNaN(v);
+      if(chartMode==='volume'){if(!l.weight||!l.reps)return false;const v=parseFloat(l.weight)*parseInt(l.reps);return !isNaN(v)&&v>0}
+      if(chartMode==='time'){const v=parseInt(l.time);return!isNaN(v)&&v>0}
+      if(chartMode==='weight'){const v=parseFloat(l.weight);return!isNaN(v)&&v>0}
+      const v=parseInt(l.reps);return!isNaN(v)&&v>0
     });
     const vals=filt.map(l=>{
       if(chartMode==='volume')return parseFloat(l.weight)*parseInt(l.reps);
-      return field==='weight'?l.weight:parseInt(l.reps);
+      if(chartMode==='time')return parseInt(l.time);
+      if(chartMode==='weight')return parseFloat(l.weight);
+      return parseInt(l.reps);
     });
 
-    // Summary stat
-    const firstV=vals[0],lastV=vals[vals.length-1];
+    // Summary stats
+    const firstV=vals[0],lastV=vals[vals.length-1],bestV=Math.max(...vals);
     const diff=lastV-firstV;
     const sign=diff>0?'+':'';
-    const weeks=vals.length;
-    const vLabel=chartMode==='volume'?'':(chartMode==='weight'?'kg':'');
-    html+='<div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;font-size:12px">';
-    html+='<span style="color:var(--text2)">Weeks: <b style="color:var(--text)">'+weeks+'</b></span>';
-    html+='<span style="color:var(--text2)">Start: <b style="color:var(--text)">'+(chartMode==='volume'?Math.round(firstV):fmtW(firstV)+vLabel)+'</b></span>';
-    html+='<span style="color:var(--text2)">Latest: <b style="color:var(--success)">'+(chartMode==='volume'?Math.round(lastV):fmtW(lastV)+vLabel)+'</b></span>';
-    html+='<span style="color:var(--text2)">Change: <b style="color:'+(diff>=0?'var(--success)':'var(--danger)')+'">'+sign+(chartMode==='volume'?Math.round(diff):fmtW(diff)+vLabel)+'</b></span>';
+    const trend=diff>0?'📈':diff<0?'📉':'➡️';
+    const vLabel=chartMode==='weight'?'kg':chartMode==='volume'?'':chartMode==='time'?'s':'';
+    const fmtV=v=>chartMode==='volume'?v>=1000?(v/1000).toFixed(1)+'K':v.toString():chartMode==='time'?v.toString():fmtW(v);
+
+    html+='<div class="progress-stats">';
+    html+='<div class="pstat"><span class="pstat-l">Weeks</span><span class="pstat-v">'+vals.length+'</span></div>';
+    html+='<div class="pstat"><span class="pstat-l">'+trend+' Trend</span><span class="pstat-v" style="color:'+(diff>=0?'var(--success)':'var(--danger)')+'">'+sign+fmtV(Math.abs(diff))+vLabel+'</span></div>';
+    html+='<div class="pstat"><span class="pstat-l">Best</span><span class="pstat-v" style="color:var(--primary)">'+fmtV(bestV)+vLabel+'</span></div>';
+    html+='<div class="pstat"><span class="pstat-l">Latest</span><span class="pstat-v" style="color:var(--success)">'+fmtV(lastV)+vLabel+'</span></div>';
     html+='</div>';
 
-    html+='<div class="chart-wrap"><canvas id="progCanvas" height="220"></canvas></div></div>';
+    html+='<div class="chart-wrap"><canvas id="progCanvas" height="220"></canvas></div>';
+
+    // Data table
+    const showTable=state._showProgTable||false;
+    html+='<div style="margin-top:10px"><span class="video-toggle" data-action="tog-table">📋 <span class="arrow">'+(showTable?'▼':'▶')+'</span> Data Table</span></div>';
+    if(showTable){
+      html+='<div class="prog-table"><table><tr><th>Week</th><th>'+modes.find(m=>m.v===chartMode)?.l||'Value'+
+        '</th><th>'+({weight:'Reps',reps:'Weight',volume:'Reps',time:'Sets'}[chartMode]||'')+'</th></tr>';
+      [...filt].reverse().forEach((l,i)=>{
+        let val;
+        if(chartMode==='volume')val=parseFloat(l.weight)*parseInt(l.reps);
+        else if(chartMode==='time')val=l.time;
+        else if(chartMode==='weight')val=l.weight;
+        else val=parseInt(l.reps);
+        const extra=chartMode==='time'?l.reps:(chartMode==='reps'?(l.weight?fmtW(l.weight)+'kg':''):(l.reps||''));
+        html+='<tr><td>'+fmtWeek(l.week)+'</td><td style="color:'+(val>=bestV?'var(--primary)':'var(--text)')+'">'+fmtV(val)+vLabel+((val>=bestV&&i===0)?'🏆':'')+'</td><td>'+extra+'</td></tr>';
+      });
+      html+='</table></div>';
+    }
+
+    html+='</div>';
     el.innerHTML=html;
 
+    // Canvas chart
     const canvas=document.getElementById('progCanvas');
+    if(!canvas)return;
     const ctx=canvas.getContext('2d');
-    const W=canvas.parentElement.clientWidth-24;
-    const H=220;const pad={top:20,bot:30,left:40,right:16};
-    canvas.width=W;canvas.height=H;
+    const W=canvas.parentElement.clientWidth-32;
+    const H=220;const pad={top:20,bot:30,left:44,right:16};
+    canvas.width=Math.max(W,100);canvas.height=H;
+    canvas.style.width=canvas.width+'px';canvas.style.height=H+'px';
 
-    if(vals.length<2){ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Not enough data to chart',W/2,H/2);return}
+    if(vals.length<2){ctx.fillStyle='#94A3B8';ctx.font='13px Inter,sans-serif';ctx.textAlign='center';ctx.fillText('Not enough data to chart',W/2,H/2);return}
 
     const minV=Math.max(0,Math.min(...vals)*0.85);
     const maxV=Math.max(...vals)*1.12;
@@ -821,39 +893,58 @@ function renderProgress(){
     const ch=H-pad.top-pad.bottom;
     const step=cw/(vals.length-1);
 
-    // Grid lines
+    // Grid
     ctx.strokeStyle='#2C2C2E';ctx.lineWidth=1;
     for(let i=0;i<=4;i++){
       const y=pad.top+ch*(i/4);
       ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(W-pad.right,y);ctx.stroke();
       const v=minV+range*(1-i/4);
-      ctx.fillStyle='#94A3B8';ctx.font='9px Inter,sans-serif';ctx.textAlign='right';
-      const lbl=chartMode==='volume'?Math.round(v).toString():chartMode==='weight'?fmtW(v)+'kg':Math.round(v).toString();
-      ctx.fillText(lbl,pad.left-4,y+3);
+      ctx.fillStyle='#94A3B8';ctx.font='9px JetBrains Mono,sans-serif';ctx.textAlign='right';
+      ctx.fillText(fmtV(v)+vLabel,pad.left-4,y+3);
     }
 
-    // Line
+    // Average trend line (dashed)
+    const avg=vals.reduce((s,v)=>s+v,0)/vals.length;
+    if(vals.length>=2){
+      ctx.strokeStyle='rgba(0,229,255,0.2)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      const ay=pad.top+ch*(1-(avg-minV)/range);
+      ctx.beginPath();ctx.moveTo(pad.left,ay);ctx.lineTo(W-pad.right,ay);ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Data line
     ctx.strokeStyle='#00E5FF';ctx.lineWidth=2.5;ctx.lineJoin='round';
     ctx.beginPath();
     vals.forEach((v,i)=>{const x=pad.left+i*step;const y=pad.top+ch*(1-(v-minV)/range);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
     ctx.stroke();
 
-    // Dots + labels
+    // Area fill under line
+    const grad=ctx.createLinearGradient(0,pad.top,0,pad.top+ch);
+    grad.addColorStop(0,'rgba(0,229,255,0.12)');grad.addColorStop(1,'rgba(0,229,255,0)');
+    ctx.fillStyle=grad;ctx.beginPath();
+    ctx.moveTo(pad.left,pad.top+ch);
+    vals.forEach((v,i)=>{const x=pad.left+i*step;const y=pad.top+ch*(1-(v-minV)/range);ctx.lineTo(x,y)});
+    ctx.lineTo(pad.left+(vals.length-1)*step,pad.top+ch);ctx.closePath();ctx.fill();
+
+    // Dots + PR highlight
+    const maxVal=Math.max(...vals);
     filt.forEach((l,i)=>{
       let v;
       if(chartMode==='volume')v=parseFloat(l.weight)*parseInt(l.reps);
-      else v=field==='weight'?l.weight:parseInt(l.reps);
+      else if(chartMode==='time')v=parseInt(l.time);
+      else if(chartMode==='weight')v=parseFloat(l.weight);
+      else v=parseInt(l.reps);
       const x=pad.left+i*step;const y=pad.top+ch*(1-(v-minV)/range);
-      ctx.fillStyle='#00E5FF';ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#000';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();
-
-      ctx.fillStyle='#94A3B8';ctx.font='8px Inter,sans-serif';ctx.textAlign='center';
+      const isPR=v>=maxVal;
+      ctx.fillStyle=isPR?'#C3F400':'#00E5FF';ctx.beginPath();ctx.arc(x,y,isPR?7:5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#000';ctx.beginPath();ctx.arc(x,y,isPR?3.5:2.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#94A3B8';ctx.font='8px JetBrains Mono,sans-serif';ctx.textAlign='center';
       ctx.fillText(fmtWeek(l.week),x,H-4);
     });
   }
 
   document.getElementById('progSelect')?.addEventListener('change',function(){
-    state._progressKey=this.value;saveState();render();
+    state._progressKey=this.value;state._chartMode=null;saveState();render();
   });
   document.getElementById('chartMode')?.addEventListener('change',function(){
     state._chartMode=this.value;saveState();render();
@@ -901,7 +992,13 @@ function renderSettings(){
   });
 
   document.getElementById('setExport').addEventListener('click',()=>{
-    const data={weightLogs:state.weightLogs,videoLinks:state.videoLinks,deletedExercises:state.deletedExercises,customExercises:state.customExercises};
+    const exercises={},days={};
+    for(const key in state.weightLogs){(exercises[key]||(exercises[key]={})).logs=state.weightLogs[key]}
+    for(const key in state.videoLinks){(exercises[key]||(exercises[key]={})).video=state.videoLinks[key]}
+    for(const key in state.exerciseTypes){(exercises[key]||(exercises[key]={})).type=state.exerciseTypes[key]}
+    for(const idx in state.customExercises){const d=days[idx]||(days[idx]={});d.custom=state.customExercises[idx]}
+    for(const idx in state.deletedExercises){const d=days[idx]||(days[idx]={});d.deleted=state.deletedExercises[idx]}
+    const data={version:2,exportedAt:new Date().toISOString().slice(0,10),exercises,days};
     const json=JSON.stringify(data,null,2);
     const blob=new Blob([json],{type:'application/json'});
     const url=URL.createObjectURL(blob);
@@ -925,11 +1022,30 @@ document.getElementById('fileInput').addEventListener('change',function(e){
     try{
       const d=JSON.parse(ev.target.result);
       if(!d||typeof d!=='object')throw new Error('Invalid');
-      if(d.weightLogs)state.weightLogs=d.weightLogs;
-      if(d.videoLinks)state.videoLinks=d.videoLinks;
-      if(d.deletedExercises)state.deletedExercises=d.deletedExercises;
-      if(d.customExercises)state.customExercises=d.customExercises;
-      saveState();render();showToast('✅ Workout data imported ('+Object.keys(d.weightLogs||{}).length+' logged exercises)');
+      // v2 hierarchical format
+      if(d.version===2&&d.exercises){
+        let exCount=0;
+        for(const key in d.exercises){
+          const ex=d.exercises[key];
+          if(ex.logs){state.weightLogs[key]=ex.logs;exCount+=ex.logs.length}
+          if(ex.video)state.videoLinks[key]=ex.video;
+          if(ex.type)state.exerciseTypes[key]=ex.type;
+        }
+        for(const idx in d.days){
+          const day=d.days[idx];
+          if(day.custom)state.customExercises[idx]=day.custom;
+          if(day.deleted)state.deletedExercises[idx]=day.deleted;
+        }
+        saveState();render();showToast('✅ Imported: '+exCount+' log entries');
+      }else{
+        // v1 legacy flat format
+        if(d.weightLogs)state.weightLogs=d.weightLogs;
+        if(d.videoLinks)state.videoLinks=d.videoLinks;
+        if(d.deletedExercises)state.deletedExercises=d.deletedExercises;
+        if(d.customExercises)state.customExercises=d.customExercises;
+        if(d.exerciseTypes)state.exerciseTypes=d.exerciseTypes;
+        saveState();render();showToast('✅ Imported: '+Object.keys(d.weightLogs||{}).length+' exercises');
+      }
     }catch(err){showToast('❌ Invalid backup file')}
   };
   reader.readAsText(file);this.value='';
@@ -974,17 +1090,27 @@ document.getElementById('mainContent').addEventListener('click',e=>{
       const card=t.closest('.exercise-card');
       const wI=card.querySelector('[data-field="weight"]');
       const rI=card.querySelector('[data-field="reps"]');
-      const wv=wI?wI.value.trim():'';const rv=rI?rI.value.trim():'';
-      if(!wv&&!rv)return;
+      const tI=card.querySelector('[data-field="time"]');
+      const wv=wI?wI.value.trim():'';const rv=rI?rI.value.trim():'';const tv=tI?tI.value.trim():'';
+      if(!wv&&!rv&&!tv)return;
       const wk=getWeekId();const la=getWeightLogs(key);
       const i=la.findIndex(l=>l.week===wk);
       const en={week:wk};
       if(wv&&!isNaN(parseFloat(wv)))en.weight=parseFloat(wv);
       if(rv)en.reps=rv;
+      if(tv&&!isNaN(parseFloat(tv)))en.time=parseFloat(tv);
       if(i>=0)Object.assign(la[i],en);else la.push(en);
       setWeightLogs(key,la);
-      showToast('✅ Logged'+(en.weight?' '+fmtW(en.weight)+'kg':'')+(en.reps?' ×'+en.reps:''));
+      showToast('✅ Logged'+(en.weight?' '+fmtW(en.weight)+'kg':'')+(en.reps?' ×'+en.reps:'')+(en.time?' '+en.time+'s':''));
       render();
+    }else if(a==='cycle-type'){
+      const key=t.dataset.key;
+      const e=(state.exerciseTypes||{})[key];
+      const cur=e||(function(){const ex=getAllExercises().find(e=>e._key===key);if(ex&&ex.type)return ex.type;if(ex&&ex.bodyweight)return'bodyweight';return'weighted'})();
+      const next=typeCycle[cur];
+      state.exerciseTypes=state.exerciseTypes||{};
+      state.exerciseTypes[key]=next;
+      saveState();render();
     }else if(a==='del'){
       const key=t.dataset.key;
       const exercises=getExercisesForDay(sel);
@@ -1029,6 +1155,7 @@ document.getElementById('mainContent').addEventListener('click',e=>{
   }
 
   if(a==='nav'){navigate(t.dataset.page);return}
+  if(a==='tog-table'){state._showProgTable=!state._showProgTable;saveState();render();return}
 
   if(page==='calendar'){
     if(a==='cal-prev'){
