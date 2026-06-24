@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32">
+  <!-- Background Grid or Accents -->
+  <rect width="512" height="512" rx="128" fill="#0F0F10" stroke="#2C2C2E" stroke-width="8"/>
+  
+  <!-- Outer Glow circle -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#00E5FF" stroke-width="4" stroke-dasharray="12 12" opacity="0.4" />
+  
+  <!-- Barbell Shaft -->
+  <rect x="96" y="240" width="320" height="32" rx="8" fill="#F1F5F9" stroke="#00E5FF" stroke-width="6"/>
+  <rect x="76" y="244" width="20" height="24" rx="4" fill="#00E5FF"/>
+  <rect x="416" y="244" width="20" height="24" rx="4" fill="#00E5FF"/>
+
+  <!-- Left Inner Plate -->
+  <rect x="140" y="140" width="28" height="232" rx="12" fill="#C3F400" stroke="#1A1A1C" stroke-width="4"/>
+  <!-- Left Middle Plate -->
+  <rect x="116" y="160" width="24" height="192" rx="10" fill="#C3F400" stroke="#1A1A1C" stroke-width="4"/>
+  <!-- Left Outer Plate -->
+  <rect x="96" y="180" width="20" height="152" rx="8" fill="#94A3B8" stroke="#1A1A1C" stroke-width="4"/>
+
+  <!-- Right Inner Plate -->
+  <rect x="344" y="140" width="28" height="232" rx="12" fill="#C3F400" stroke="#1A1A1C" stroke-width="4"/>
+  <!-- Right Middle Plate -->
+  <rect x="372" y="160" width="24" height="192" rx="10" fill="#C3F400" stroke="#1A1A1C" stroke-width="4"/>
+  <!-- Right Outer Plate -->
+  <rect x="396" y="180" width="20" height="152" rx="8" fill="#94A3B8" stroke="#1A1A1C" stroke-width="4"/>
+
+  <!-- Central Badge/Shield -->
+  <polygon points="256,200 300,230 300,282 256,312 212,282 212,230" fill="#1A1A1C" stroke="#00E5FF" stroke-width="6" />
+  
+  <!-- Text inside badge -->
+  <text x="256" y="266" font-family="'Hanken Grotesk', sans-serif" font-size="28" font-weight="900" fill="#F1F5F9" text-anchor="middle">LL</text>
+</svg>

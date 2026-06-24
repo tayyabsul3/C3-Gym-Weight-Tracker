@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-textPrimary font-body antialiased min-h-screen overflow-x-hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-wide uppercase;
+  }
+}
+
+/* Custom horizontal scroll bar specs */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary;
+}
+
+/* Reduced motion preference specs */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+  }
+}

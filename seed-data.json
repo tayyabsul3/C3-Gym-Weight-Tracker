@@ -1,0 +1,77 @@
+{
+  "version": 2,
+  "exportedAt": "2026-06-21T00:00:00.000Z",
+  "description": "Seed data: W24 baseline (slightly less) + W25 actual lifts. Import via Settings → Import.",
+  "profile": {
+    "name": "Trainee",
+    "goal": "Build muscle, get stronger"
+  },
+  "exercises": {
+    "0_0": { "logs": [{ "week": "2026-W24", "weight": 10, "reps": "30" }, { "week": "2026-W25", "weight": 12, "reps": "36" }] },
+    "0_1": { "logs": [{ "week": "2026-W24", "weight": 15, "reps": "30" }, { "week": "2026-W25", "weight": 20, "reps": "36" }] },
+    "0_2": { "logs": [{ "week": "2026-W24", "weight": 30, "reps": "30" }, { "week": "2026-W25", "weight": 36, "reps": "36" }] },
+    "0_3": { "logs": [{ "week": "2026-W24", "weight": 8, "reps": "30" }, { "week": "2026-W25", "weight": 10, "reps": "36" }] },
+    "0_4": { "logs": [{ "week": "2026-W24", "weight": 5, "reps": "12" }, { "week": "2026-W25", "weight": 7.5, "reps": "15" }] },
+    "0_5": { "logs": [{ "week": "2026-W24", "weight": 25, "reps": "10" }, { "week": "2026-W25", "weight": 30, "reps": "12" }] },
+    "0_6": { "logs": [{ "week": "2026-W24", "reps": "30" }, { "week": "2026-W25", "reps": "36" }] },
+    "0_7": { "logs": [{ "week": "2026-W24", "time": 90 }, { "week": "2026-W25", "time": 105, "reps": "2" }] },
+
+    "1_0": { "logs": [{ "week": "2026-W24", "weight": 30, "reps": "30" }, { "week": "2026-W25", "weight": 36, "reps": "36" }] },
+    "1_1": { "logs": [{ "week": "2026-W24", "weight": 30, "reps": "30" }, { "week": "2026-W25", "weight": 36, "reps": "36" }] },
+    "1_2": { "logs": [{ "week": "2026-W24", "weight": 20, "reps": "30" }, { "week": "2026-W25", "weight": 24, "reps": "36" }] },
+    "1_3": { "logs": [{ "week": "2026-W24", "weight": 12, "reps": "30" }, { "week": "2026-W25", "weight": 15, "reps": "36" }] },
+    "1_4": { "logs": [{ "week": "2026-W24", "weight": 5, "reps": "24" }, { "week": "2026-W25", "weight": 7.5, "reps": "30" }] },
+    "1_5": { "logs": [{ "week": "2026-W24", "weight": 10, "reps": "30" }, { "week": "2026-W25", "weight": 12, "reps": "36" }] },
+    "1_6": { "logs": [{ "week": "2026-W24", "weight": 25, "reps": "24" }, { "week": "2026-W25", "weight": 30, "reps": "30" }] },
+    "1_7": { "logs": [{ "week": "2026-W24", "time": 75 }, { "week": "2026-W25", "time": 90 }] },
+
+    "2_0": { "logs": [{ "week": "2026-W24", "reps": "35" }, { "week": "2026-W25", "reps": "45" }] },
+    "2_1": { "logs": [{ "week": "2026-W24", "weight": 5, "reps": "30" }, { "week": "2026-W25", "weight": 5, "reps": "36" }] },
+    "2_2": { "logs": [] },
+    "2_3": { "logs": [] },
+    "2_4": { "logs": [{ "week": "2026-W24", "reps": "30" }, { "week": "2026-W25", "reps": "36" }] },
+    "2_5": { "logs": [] },
+    "2_6": { "logs": [] },
+    "2_7": { "logs": [] },
+
+    "3_0": { "logs": [{ "week": "2026-W24", "weight": 8, "reps": "30" }, { "week": "2026-W25", "weight": 10, "reps": "36" }] },
+    "3_1": { "logs": [{ "week": "2026-W24", "weight": 8, "reps": "30" }, { "week": "2026-W25", "weight": 10, "reps": "36" }] },
+    "3_2": { "logs": [{ "week": "2026-W24", "weight": 5, "reps": "12" }, { "week": "2026-W25", "weight": 7.5, "reps": "15" }] },
+    "3_3": { "logs": [] },
+    "3_4": { "logs": [{ "week": "2026-W24", "weight": 5, "reps": "30" }, { "week": "2026-W25", "weight": 5, "reps": "36" }] },
+    "3_5": { "logs": [] },
+    "3_6": { "logs": [{ "week": "2026-W24", "weight": 25, "reps": "30" }, { "week": "2026-W25", "weight": 30, "reps": "36" }] },
+    "3_7": { "logs": [{ "week": "2026-W24", "reps": "30" }, { "week": "2026-W25", "reps": "36" }] },
+
+    "4_0": { "logs": [{ "week": "2026-W24", "reps": "4" }, { "week": "2026-W25", "reps": "6" }] },
+    "4_1": { "logs": [{ "week": "2026-W24", "weight": 12, "reps": "30" }, { "week": "2026-W25", "weight": 15, "reps": "36" }] },
+    "4_2": { "logs": [{ "week": "2026-W24", "weight": 8, "reps": "30" }, { "week": "2026-W25", "weight": 10, "reps": "36" }] },
+    "4_3": { "logs": [{ "week": "2026-W24", "weight": 10, "reps": "30" }, { "week": "2026-W25", "weight": 12, "reps": "36" }] },
+    "4_4": { "logs": [{ "week": "2026-W24", "weight": 25, "reps": "30" }, { "week": "2026-W25", "weight": 30, "reps": "36" }] },
+    "4_5": { "logs": [{ "week": "2026-W24", "weight": 20, "reps": "30" }, { "week": "2026-W25", "weight": 24, "reps": "36" }] },
+    "4_6": { "logs": [{ "week": "2026-W24", "weight": 15, "reps": "30" }, { "week": "2026-W25", "weight": 20, "reps": "36" }] },
+    "4_7": { "logs": [{ "week": "2026-W24", "weight": 8, "reps": "30" }, { "week": "2026-W25", "weight": 10, "reps": "36" }] },
+
+    "5_0": { "logs": [{ "week": "2026-W24", "weight": 40, "reps": "30" }, { "week": "2026-W25", "weight": 50, "reps": "36" }] },
+    "5_1": { "logs": [{ "week": "2026-W24", "weight": 20, "reps": "30" }, { "week": "2026-W25", "weight": 24, "reps": "36" }] },
+    "5_2": { "logs": [{ "week": "2026-W24", "weight": 15, "reps": "30" }, { "week": "2026-W25", "weight": 20, "reps": "36" }] },
+    "5_3": { "logs": [{ "week": "2026-W24", "weight": 35, "reps": "30" }, { "week": "2026-W25", "weight": 40, "reps": "36" }] },
+    "5_4": { "logs": [] },
+    "5_5": { "logs": [] },
+    "5_6": { "logs": [{ "week": "2026-W24", "weight": 15, "reps": "30" }, { "week": "2026-W25", "weight": 18, "reps": "36" }] },
+    "5_7": { "logs": [{ "week": "2026-W24", "weight": 15, "reps": "30" }, { "week": "2026-W25", "weight": 18, "reps": "36" }] }
+  },
+  "days": {
+    "2": { "deleted": [2, 3, 5, 6, 7] },
+    "3": { "deleted": [3, 5] },
+    "5": { "deleted": [4, 5] }
+  },
+  "attendance": {
+    "2026-06-08": "workout", "2026-06-09": "workout", "2026-06-10": "workout",
+    "2026-06-11": "rest",
+    "2026-06-12": "workout", "2026-06-13": "workout", "2026-06-14": "workout",
+    "2026-06-15": "workout", "2026-06-16": "workout", "2026-06-17": "workout",
+    "2026-06-18": "rest",
+    "2026-06-19": "workout", "2026-06-20": "workout"
+  }
+}

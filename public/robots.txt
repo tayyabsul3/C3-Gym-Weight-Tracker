@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Block dev/build artifacts
+Disallow: /src/
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /dist/
+
+# Sitemap
+Sitemap: https://lifttrackerlog.vercel.app/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 10
