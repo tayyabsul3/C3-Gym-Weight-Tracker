@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceLine, Area, AreaChart,
-  Legend
+  ResponsiveContainer, ReferenceLine, Area, AreaChart
 } from 'recharts';
 import {
   TrendingUp, TrendingDown, MoveRight,
@@ -38,9 +37,7 @@ type ChartType = 'area' | 'bar';
 const METRIC_UNITS: Record<MetricMode, string> = {
   weight: 'kg', reps: '', time: 's', volume: ''
 };
-const METRIC_LABELS: Record<MetricMode, string> = {
-  weight: 'Weight (kg)', reps: 'Reps', time: 'Duration (s)', volume: 'Volume'
-};
+
 const ACCENT_COLORS: Record<MetricMode, string> = {
   weight: '#F97316', reps: '#818CF8', time: '#22C55E', volume: '#F59E0B'
 };
